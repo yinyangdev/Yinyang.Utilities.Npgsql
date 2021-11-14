@@ -237,32 +237,30 @@ namespace Yinyang.Utilities.Npgsql
         public T ExecuteReaderFirst<T>() where T : new()
         {
             T t = default;
-            using var reader = _sqlCommand.ExecuteReader();
-            while (reader.Read())
+            using (var reader = _sqlCommand.ExecuteReader())
             {
-                t = new T();
-
-                for (var inc = 0; inc < reader.FieldCount; inc++)
+                while (reader.Read())
                 {
-                    var type = t.GetType();
-                    var prop = type.GetProperty(reader.GetName(inc));
-                    if (prop != null)
+                    t = new T();
+
+                    for (var inc = 0; inc < reader.FieldCount; inc++)
                     {
-                        var val = reader.GetValue(inc);
-                        if (val == DBNull.Value)
+                        var type = t.GetType();
+                        var prop = type.GetProperty(reader.GetName(inc));
+                        if (prop != null)
                         {
-                            continue;
+                            var val = reader.GetValue(inc);
+                            if (val == DBNull.Value)
+                            {
+                                continue;
+                            }
+                            prop.SetValue(t, val, null);
                         }
-
-                        prop.SetValue(t, val, null);
                     }
+                    break;
                 }
-
-                break;
+                reader.Close();
             }
-
-            reader.Close();
-
             return t;
         }
 
@@ -275,39 +273,40 @@ namespace Yinyang.Utilities.Npgsql
         {
             T t = default;
 
-            using var reader = _sqlCommand.ExecuteReader();
-            while (reader.Read())
+            using (var reader = _sqlCommand.ExecuteReader())
             {
-                t = new T();
-
-                for (var inc = 0; inc < reader.FieldCount; inc++)
+                while (reader.Read())
                 {
-                    var type = t.GetType();
-                    var prop = type.GetProperty(reader.GetName(inc));
-                    if (prop != null)
-                    {
-                        try
-                        {
-                            var val = reader.GetValue(inc);
-                            if (val == DBNull.Value)
-                            {
-                                continue;
-                            }
+                    t = new T();
 
-                            prop.SetValue(t, val, null);
-                            prop.SetValue(t, reader.GetValue(inc), null);
-                        }
-                        catch
+                    for (var inc = 0; inc < reader.FieldCount; inc++)
+                    {
+                        var type = t.GetType();
+                        var prop = type.GetProperty(reader.GetName(inc));
+                        if (prop != null)
                         {
-                            // ignored
+                            try
+                            {
+                                var val = reader.GetValue(inc);
+                                if (val == DBNull.Value)
+                                {
+                                    continue;
+                                }
+
+                                prop.SetValue(t, val, null);
+                                prop.SetValue(t, reader.GetValue(inc), null);
+                            }
+                            catch
+                            {
+                                // ignored
+                            }
                         }
                     }
+                    break;
                 }
-
-                break;
+                reader.Close();
             }
 
-            reader.Close();
 
             return t;
         }
@@ -320,32 +319,31 @@ namespace Yinyang.Utilities.Npgsql
         public List<T> ExecuteReader<T>() where T : new()
         {
             var res = new List<T>();
-            using var reader = _sqlCommand.ExecuteReader();
-            while (reader.Read())
+            using (var reader = _sqlCommand.ExecuteReader())
             {
-                var t = new T();
-
-                for (var inc = 0; inc < reader.FieldCount; inc++)
+                while (reader.Read())
                 {
-                    var type = t.GetType();
-                    var prop = type.GetProperty(reader.GetName(inc));
-                    if (prop != null)
+                    var t = new T();
+
+                    for (var inc = 0; inc < reader.FieldCount; inc++)
                     {
-                        var val = reader.GetValue(inc);
-                        if (val == DBNull.Value)
+                        var type = t.GetType();
+                        var prop = type.GetProperty(reader.GetName(inc));
+                        if (prop != null)
                         {
-                            continue;
+                            var val = reader.GetValue(inc);
+                            if (val == DBNull.Value)
+                            {
+                                continue;
+                            }
+
+                            prop.SetValue(t, val, null);
                         }
-
-                        prop.SetValue(t, val, null);
                     }
+                    res.Add(t);
                 }
-
-                res.Add(t);
+                reader.Close();
             }
-
-            reader.Close();
-
             return res;
         }
 
@@ -357,40 +355,39 @@ namespace Yinyang.Utilities.Npgsql
         public List<T> TryExecuteReader<T>() where T : new()
         {
             var res = new List<T>();
-            using var reader = _sqlCommand.ExecuteReader();
-            while (reader.Read())
+            using (var reader = _sqlCommand.ExecuteReader())
             {
-                var t = new T();
-
-                for (var inc = 0; inc < reader.FieldCount; inc++)
+                while (reader.Read())
                 {
-                    var type = t.GetType();
-                    var prop = type.GetProperty(reader.GetName(inc));
-                    if (prop != null)
-                    {
-                        try
-                        {
-                            var val = reader.GetValue(inc);
-                            if (val == DBNull.Value)
-                            {
-                                continue;
-                            }
+                    var t = new T();
 
-                            prop.SetValue(t, val, null);
-                            prop.SetValue(t, reader.GetValue(inc), null);
-                        }
-                        catch
+                    for (var inc = 0; inc < reader.FieldCount; inc++)
+                    {
+                        var type = t.GetType();
+                        var prop = type.GetProperty(reader.GetName(inc));
+                        if (prop != null)
                         {
-                            // ignored
+                            try
+                            {
+                                var val = reader.GetValue(inc);
+                                if (val == DBNull.Value)
+                                {
+                                    continue;
+                                }
+
+                                prop.SetValue(t, val, null);
+                                prop.SetValue(t, reader.GetValue(inc), null);
+                            }
+                            catch
+                            {
+                                // ignored
+                            }
                         }
                     }
+                    res.Add(t);
                 }
-
-                res.Add(t);
+                reader.Close();
             }
-
-            reader.Close();
-
             return res;
         }
 
